@@ -239,13 +239,16 @@ class DictionaryManager {
         }
     }
     
-    func toggleDictionary(index: Int, enabled: Bool, type: DictionaryType) {
+    func toggleDictionary(id: UUID, enabled: Bool, type: DictionaryType) {
         switch type {
         case .term:
+            guard let index = termDictionaries.firstIndex(where: { $0.id == id }) else { return }
             termDictionaries[index].isEnabled = enabled
         case .frequency:
+            guard let index = frequencyDictionaries.firstIndex(where: { $0.id == id }) else { return }
             frequencyDictionaries[index].isEnabled = enabled
         case .pitch:
+            guard let index = pitchDictionaries.firstIndex(where: { $0.id == id }) else { return }
             pitchDictionaries[index].isEnabled = enabled
         }
         saveDictionaryConfig()
@@ -304,6 +307,7 @@ class DictionaryManager {
                 pitchDictionaries.remove(at: index)
             }
         }
+        updateOrder(type: type)
         saveDictionaryConfig()
         rebuildLookupQuery()
     }
