@@ -43,6 +43,10 @@ A lightweight Japanese EPUB reader designed for iOS 26 with Yomitan dictionary s
 1. Clone the repository.
 2. Open `HoshiReader.xcodeproj` in Xcode.
 
+## Contributing
+
+If you're planning on contributing a feature or significant change, please open an issue or message me on Discord first. I can't guarantee I'll accept every PR or feature, as I try to keep the project aligned with my own ideas.
+
 ## Libraries
 
 | Name | License |
