@@ -12,14 +12,14 @@
 		48568A5C2F1E7F5C00F9C126 /* HoshiIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 48568A472F1E7F5C00F9C126 /* HoshiIcon.icon */; };
 		48568CD32F1EC9A400F9C126 /* EPUBKit in Frameworks */ = {isa = PBXBuildFile; productRef = 48568CD22F1EC9A400F9C126 /* EPUBKit */; };
 		48BC0BDF2F5C316B00EDAC3F /* CHoshiDicts in Frameworks */ = {isa = PBXBuildFile; productRef = 48BC0BDE2F5C316B00EDAC3F /* CHoshiDicts */; };
-		48F6FAE72F34BB7900289485 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 48F6FAE62F34BB7900289485 /* PrivacyInfo.xcprivacy */; };
+		48C8125F2F5F47C000127630 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 48C8125E2F5F47C000127630 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		48568A462F1E7F5C00F9C126 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		48568A472F1E7F5C00F9C126 /* HoshiIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = HoshiIcon.icon; sourceTree = "<group>"; };
+		48C8125E2F5F47C000127630 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		48D95BC52F1BF4D80074AD70 /* Hoshi Reader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Hoshi Reader.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		48F6FAE62F34BB7900289485 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -120,6 +120,7 @@
 		48107AAE2F114021009E12D1 = {
 			isa = PBXGroup;
 			children = (
+				48C8125E2F5F47C000127630 /* PrivacyInfo.xcprivacy */,
 				48568A622F1E926300F9C126 /* App */,
 				48568A662F1E926300F9C126 /* Core */,
 				48568A792F1E926300F9C126 /* Features */,
@@ -128,7 +129,6 @@
 				48568A462F1E7F5C00F9C126 /* Assets.xcassets */,
 				48568A472F1E7F5C00F9C126 /* HoshiIcon.icon */,
 				48D95BC52F1BF4D80074AD70 /* Hoshi Reader.app */,
-				48F6FAE62F34BB7900289485 /* PrivacyInfo.xcprivacy */,
 			);
 			sourceTree = "<group>";
 		};
@@ -204,8 +204,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48F6FAE72F34BB7900289485 /* PrivacyInfo.xcprivacy in Resources */,
 				48568A5B2F1E7F5C00F9C126 /* Assets.xcassets in Resources */,
+				48C8125F2F5F47C000127630 /* PrivacyInfo.xcprivacy in Resources */,
 				48568A5C2F1E7F5C00F9C126 /* HoshiIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
