@@ -30,6 +30,14 @@ struct BookView: View {
                                 .padding(6)
                         }
                     }
+                    .overlay(alignment: .bottomTrailing) {
+                        if !isSelected && progress >= 0.999 {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 22))
+                                .foregroundStyle(.white, .gray)
+                                .padding(6)
+                        }
+                    }
             } else {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(Color.gray.opacity(0.3))

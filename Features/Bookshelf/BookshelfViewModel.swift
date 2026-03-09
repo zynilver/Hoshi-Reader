@@ -295,6 +295,23 @@ class BookshelfViewModel {
         }
     }
     
+    func markRead(book: BookMetadata) {
+        guard let bookFolder = book.folder else { return }
+        let directory = try! BookStorage.getBooksDirectory()
+        let url = directory.appendingPathComponent(bookFolder)
+        guard let bookInfo = BookStorage.loadBookInfo(root: url) else { return }
+        
+        let bookmark = Bookmark(
+            chapterIndex: bookInfo.chapterInfo.values.compactMap(\.spineIndex).max() ?? 0,
+            progress: 1,
+            characterCount: bookInfo.characterCount,
+            lastModified: Date()
+        )
+        
+        try? BookStorage.save(bookmark, inside: url, as: FileNames.bookmark)
+        loadBookProgress()
+    }
+    
     private func importProgress(ttuProgress: TtuProgress, to url: URL) {
         guard let bookInfo = BookStorage.loadBookInfo(root: url) else { return }
         

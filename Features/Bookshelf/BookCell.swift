@@ -10,6 +10,7 @@ import SwiftUI
 struct BookCell: View {
     @Environment(UserConfig.self) var userConfig
     @State private var showDeleteConfirmation = false
+    @State private var markReadConfirmation = false
     let book: BookMetadata
     var viewModel: BookshelfViewModel
     var currentShelf: String?
@@ -83,6 +84,12 @@ struct BookCell: View {
                 }
             }
             
+            Button {
+                markReadConfirmation = true
+            } label: {
+                Label("Mark Read", systemImage: "checkmark")
+            }
+            
             Button(role: .destructive) {
                 showDeleteConfirmation = true
             } label: {
@@ -96,6 +103,15 @@ struct BookCell: View {
         ) {
             Button("Delete", role: .destructive) {
                 viewModel.deleteBook(book)
+            }
+        }
+        .confirmationDialog(
+            "Mark \"\(book.title ?? "")\" as read?",
+            isPresented: $markReadConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Confirm") {
+                viewModel.markRead(book: book)
             }
         }
     }
