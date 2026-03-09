@@ -237,7 +237,7 @@ class UserConfig {
         self.bookshelfSortOption = defaults.string(forKey: "bookshelfSortOption")
             .flatMap(SortOption.init) ?? .recent
         
-        self.maxResults = defaults.object(forKey: "maxResults") as? Int ?? 16
+        self.maxResults = defaults.object(forKey: "maxResults") as? Int ?? 8
         self.collapseDictionaries = defaults.object(forKey: "collapseDictionaries") as? Bool ?? false
         self.compactGlossaries = defaults.object(forKey: "compactGlossaries") as? Bool ?? true
         
