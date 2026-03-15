@@ -323,7 +323,7 @@ class DictionaryManager {
                         continue
                     }
                     
-                    let (temp, _) = try await URLSession.shared.download(from: URL(string: index.downloadUrl)!)
+                    let (temp, _) = try await URLSession.shared.download(from: URL(string: remoteIndex.downloadUrl)!)
                     tempFiles.append(temp)
                     
                     let destinationPath = try await Self.getDictionariesDirectory()
