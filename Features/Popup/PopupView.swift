@@ -111,6 +111,7 @@ struct PopupView: View {
     var clearHighlight: Bool
     var onTextSelected: ((SelectionData) -> Int?)?
     var onTapOutside: (() -> Void)?
+    var onSwipeDismiss: (() -> Void)?
     
     private var layout: PopupLayout? {
         guard let selectionData else {
@@ -148,7 +149,8 @@ struct PopupView: View {
                             AnkiManager.shared.addNote(content: content, context: MiningContext(sentence: selectionData.sentence, documentTitle: documentTitle, coverURL: coverURL))
                         },
                         onTextSelected: onTextSelected,
-                        onTapOutside: onTapOutside
+                        onTapOutside: onTapOutside,
+                        onSwipeDismiss: onSwipeDismiss
                     )
                     .frame(width: max(1, layout.width), height: max(1, layout.height))
                     .glassEffect(.regular, in: .rect(cornerRadius: 8))
@@ -165,7 +167,8 @@ struct PopupView: View {
                         AnkiManager.shared.addNote(content: content, context: MiningContext(sentence: selectionData.sentence, documentTitle: documentTitle, coverURL: coverURL))
                     },
                     onTextSelected: onTextSelected,
-                    onTapOutside: onTapOutside
+                    onTapOutside: onTapOutside,
+                    onSwipeDismiss: onSwipeDismiss
                 )
                 .frame(width: max(1, layout.width), height: max(1, layout.height))
                 .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
@@ -251,6 +254,7 @@ struct PopupView: View {
             window.needsAudio = \(AnkiManager.shared.needsAudio);
             window.allowDupes = \(AnkiManager.shared.allowDupes);
             window.customCSS = \(customCSS);
+            window.swipeThreshold = \(userConfig.popupSwipeToDismiss ? userConfig.popupSwipeThreshold : 0);
         </script>
         <div id="entries-container"></div>
         """

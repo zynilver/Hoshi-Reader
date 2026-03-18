@@ -62,26 +62,21 @@ struct DictionarySearchView: View {
                             if let index = popups.firstIndex(where: { $0.id == popupId }) {
                                 closeChildPopups(parent: index)
                             }
+                        },
+                        onSwipeDismiss: {
+                            guard let index = popups.firstIndex(where: { $0.id == popupId }),
+                                  popups.indices.contains(index) else {
+                                return
+                            }
+                            if index == 0 {
+                                clearHighlight.toggle()
+                                closePopups()
+                            } else if popups.indices.contains(index - 1) {
+                                popups[index - 1].clearHighlight.toggle()
+                                closeChildPopups(parent: index - 1)
+                            }
                         }
                     )
-                    .simultaneousGesture(DragGesture().onEnded({ value in
-                        guard userConfig.popupSwipeToDismiss,
-                              abs(value.translation.width) > CGFloat(userConfig.popupSwipeThreshold),
-                              abs(value.translation.height) < 20,
-                              let index = popups.firstIndex(where: { $0.id == popupId }),
-                              popups.indices.contains(index),
-                              popups[index].showPopup else {
-                            return
-                        }
-                        
-                        if index == 0 {
-                            clearHighlight.toggle()
-                            closePopups()
-                        } else if popups.indices.contains(index - 1) {
-                            popups[index - 1].clearHighlight.toggle()
-                            closeChildPopups(parent: index - 1)
-                        }
-                    }))
                     .zIndex(Double(100 + (popups.firstIndex(where: { $0.id == popupId }) ?? 0)))
                 }
             }

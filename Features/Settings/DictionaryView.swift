@@ -64,7 +64,7 @@ struct DictionaryView: View {
                     Spacer()
                     Text("\(userConfig.scanLength)")
                         .fontWeight(.semibold)
-                    Stepper("", value: Bindable(userConfig).scanLength, in: 1...32)
+                    Stepper("", value: Bindable(userConfig).scanLength, in: 1...64)
                         .labelsHidden()
                 }
                 Toggle("Auto-collapse Dictionaries", isOn: Bindable(userConfig).collapseDictionaries)

@@ -160,26 +160,21 @@ struct ReaderView: View {
                                 if let index = viewModel.popups.firstIndex(where: { $0.id == popupId }) {
                                     viewModel.closeChildPopups(parent: index)
                                 }
+                            },
+                            onSwipeDismiss: {
+                                guard let index = viewModel.popups.firstIndex(where: { $0.id == popupId }),
+                                      viewModel.popups.indices.contains(index) else {
+                                    return
+                                }
+                                if index == 0 {
+                                    viewModel.clearWebHighlight()
+                                    viewModel.closePopups()
+                                } else if viewModel.popups.indices.contains(index - 1) {
+                                    viewModel.popups[index - 1].clearHighlight.toggle()
+                                    viewModel.closeChildPopups(parent: index - 1)
+                                }
                             }
                         )
-                        .simultaneousGesture(DragGesture().onEnded({ value in
-                            guard userConfig.popupSwipeToDismiss,
-                                  abs(value.translation.width) > CGFloat(userConfig.popupSwipeThreshold),
-                                  abs(value.translation.height) < 20,
-                                  let index = viewModel.popups.firstIndex(where: { $0.id == popupId }),
-                                  viewModel.popups.indices.contains(index),
-                                  viewModel.popups[index].showPopup else {
-                                return
-                            }
-                            
-                            if index == 0 {
-                                viewModel.clearWebHighlight()
-                                viewModel.closePopups()
-                            } else if viewModel.popups.indices.contains(index - 1) {
-                                viewModel.popups[index - 1].clearHighlight.toggle()
-                                viewModel.closeChildPopups(parent: index - 1)
-                            }
-                        }))
                         .zIndex(Double(100 + (viewModel.popups.firstIndex(where: { $0.id == popupId }) ?? 0)))
                     }
                 }

@@ -109,6 +109,7 @@ struct PopupWebView: UIViewRepresentable {
     var onMine: (([String: String]) -> Void)? = nil
     var onTextSelected: ((SelectionData) -> Int?)? = nil
     var onTapOutside: (() -> Void)? = nil
+    var onSwipeDismiss: (() -> Void)? = nil
     
     private static let selectionJs: String = {
         guard let url = Bundle.main.url(forResource: "selection", withExtension: "js"),
@@ -131,6 +132,28 @@ struct PopupWebView: UIViewRepresentable {
         }
         return css
     }()
+
+    private static let swipeDismissJs = """
+    (function() {
+        if (!window.swipeThreshold) {
+            return;
+        }
+        var startX, startY;
+        document.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+        document.addEventListener('touchend', function(e) {
+            var dx = e.changedTouches[0].clientX - startX;
+            var dy = e.changedTouches[0].clientY - startY;
+            var hasSelection = window.getSelection().toString();
+            
+            if (Math.abs(dx) > window.swipeThreshold && Math.abs(dy) < 20 && !hasSelection) {
+                webkit.messageHandlers.swipeDismiss.postMessage(null);
+            }
+        });
+    })();
+    """
     
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
@@ -142,6 +165,7 @@ struct PopupWebView: UIViewRepresentable {
         config.userContentController.add(context.coordinator, name: "openLink")
         config.userContentController.add(context.coordinator, name: "textSelected")
         config.userContentController.add(context.coordinator, name: "tapOutside")
+        config.userContentController.add(context.coordinator, name: "swipeDismiss")
         config.userContentController.add(context.coordinator, name: "playWordAudio")
         config.userContentController.addScriptMessageHandler(context.coordinator, contentWorld: .page, name: "duplicateCheck")
         config.setURLSchemeHandler(AudioHandler(), forURLScheme: "audio")
@@ -180,6 +204,7 @@ struct PopupWebView: UIViewRepresentable {
         webView.configuration.userContentController.removeScriptMessageHandler(forName: "openLink")
         webView.configuration.userContentController.removeScriptMessageHandler(forName: "textSelected")
         webView.configuration.userContentController.removeScriptMessageHandler(forName: "tapOutside")
+        webView.configuration.userContentController.removeScriptMessageHandler(forName: "swipeDismiss")
         webView.configuration.userContentController.removeScriptMessageHandler(forName: "playWordAudio")
         webView.configuration.userContentController.removeScriptMessageHandler(forName: "duplicateCheck", contentWorld: .page)
     }
@@ -213,6 +238,9 @@ struct PopupWebView: UIViewRepresentable {
             else if message.name == "tapOutside" {
                 parent.onTapOutside?()
                 message.webView?.evaluateJavaScript("window.hoshiSelection.clearHighlight()")
+            }
+            else if message.name == "swipeDismiss" {
+                parent.onSwipeDismiss?()
             }
             else if message.name == "textSelected" {
                 guard let body = message.body as? [String: Any],
@@ -261,6 +289,7 @@ struct PopupWebView: UIViewRepresentable {
         </head>
         <body>
             \(content)
+            <script>\(Self.swipeDismissJs)</script>
             <div class="overlay">
                 <div class="overlay-close" onclick="closeOverlay()">×</div>
                 <div class="overlay-content"></div>
