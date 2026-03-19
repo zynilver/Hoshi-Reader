@@ -92,7 +92,7 @@ struct AudioView: View {
             } header: {
                 Text("Local Audio")
             } footer: {
-                Text("Import a **[Local Audio database](https://github.com/KamWithK/AnkiconnectAndroid?tab=readme-ov-file#additional-instructions-local-audio)** for offline dictionary audio. The local audio source is automatically added when enabled.")
+                Text("Import a local audio database for offline dictionary audio. The local audio source is automatically added when enabled.")
             }
         }
         .fileImporter(

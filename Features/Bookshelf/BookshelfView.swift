@@ -36,16 +36,26 @@ struct BookshelfView: View {
                 NavigationStack(path: $navigationPath) {
                     ScrollView {
                         let sections = viewModel.shelfSections(sortedBy: userConfig.bookshelfSortOption)
-                        ForEach(sections, id: \.shelf?.name) { section in
-                            if section.books.count > 0 {
-                                ShelfView(
-                                    viewModel: viewModel,
-                                    section: section,
-                                    showTitle: sections.count > 1,
-                                    isSelecting: isSelecting,
-                                    selectedBooks: $selectedBooks,
-                                    pendingLookup: $pendingLookup
-                                )
+                        if viewModel.books.isEmpty {
+                            ContentUnavailableView {
+                                Label("No Books", systemImage: "books.vertical")
+                            } description: {
+                                Text("Import an EPUB using the \(Image(systemName: "plus")) button to start reading.")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 160)
+                        } else {
+                            ForEach(sections, id: \.shelf?.name) { section in
+                                if section.books.count > 0 {
+                                    ShelfView(
+                                        viewModel: viewModel,
+                                        section: section,
+                                        showTitle: sections.count > 1,
+                                        isSelecting: isSelecting,
+                                        selectedBooks: $selectedBooks,
+                                        pendingLookup: $pendingLookup
+                                    )
+                                }
                             }
                         }
                     }

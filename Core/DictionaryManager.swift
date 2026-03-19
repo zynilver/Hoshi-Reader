@@ -206,11 +206,15 @@ class DictionaryManager {
             do {
                 for (file, url, type) in recommendedDictionaries {
                     await MainActor.run {
-                        self.currentImport = "\(file)"
+                        self.currentImport = "Downloading \(file)"
                     }
                     
                     let (temp, _) = try await URLSession.shared.download(from: URL(string: url)!)
                     tempFiles.append(temp)
+                    
+                    await MainActor.run {
+                        self.currentImport = "Importing \(file)"
+                    }
                     
                     let destinationPath = try await Self.getDictionariesDirectory()
                         .appendingPathComponent(type.rawValue).path(percentEncoded: false)
@@ -258,7 +262,7 @@ class DictionaryManager {
             
             for url in urls {
                 await MainActor.run {
-                    self.currentImport = "\(url.lastPathComponent)"
+                    self.currentImport = "Importing \(url.lastPathComponent)"
                 }
                 
                 let current = url.lastPathComponent
@@ -313,7 +317,7 @@ class DictionaryManager {
                 for (dictionary, type) in dictionaries {
                     let index = dictionary.index
                     await MainActor.run {
-                        self.currentImport = index.title
+                        self.currentImport = "Checking \(index.title)"
                     }
                     
                     let (data, _) = try await URLSession.shared.data(from: URL(string: index.indexUrl)!)
@@ -323,8 +327,16 @@ class DictionaryManager {
                         continue
                     }
                     
+                    await MainActor.run {
+                        self.currentImport = "Downloading \(index.title)"
+                    }
+                    
                     let (temp, _) = try await URLSession.shared.download(from: URL(string: remoteIndex.downloadUrl)!)
                     tempFiles.append(temp)
+                    
+                    await MainActor.run {
+                        self.currentImport = "Importing \(index.title)"
+                    }
                     
                     let destinationPath = try await Self.getDictionariesDirectory()
                         .appendingPathComponent(type.rawValue).path(percentEncoded: false)

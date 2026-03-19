@@ -21,7 +21,7 @@ struct DictionaryView: View {
     var body: some View {
         List {
             Section {
-                Button("Get recommended Dictionaries") {
+                Button("Download Recommended Dictionaries") {
                     showDownloadConfirmation = true
                 }
                 .disabled(dictionaryManager.isImporting)
@@ -31,7 +31,7 @@ struct DictionaryView: View {
                     }
                     Button("Cancel", role: .cancel) {}
                 } message: {
-                    Text("This will download the following Dictionaries:\nJMdict Yomitan (Term)\nJiten.moe (Frequency)")
+                    Text("This will download the latest versions of the following dictionaries (22mb):\nJMdict (Term)\nJiten (Frequency)")
                 }
                 if (dictionaryManager.updatableDictionaries.count > 0) {
                     Button("Update Dictionaries") {
@@ -188,11 +188,8 @@ struct DictionaryView: View {
             }
         }
         .overlay {
-            if dictionaryManager.isImporting {
-                LoadingOverlay("Importing \(dictionaryManager.currentImport)")
-            }
-            if dictionaryManager.isUpdating {
-                LoadingOverlay("Updating \(dictionaryManager.currentImport)")
+            if dictionaryManager.isImporting || dictionaryManager.isUpdating {
+                LoadingOverlay(dictionaryManager.currentImport)
             }
         }
         .navigationTitle("Dictionaries")
