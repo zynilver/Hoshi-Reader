@@ -271,7 +271,7 @@ struct DictionarySearchView: View {
             window.customCSS = \(customCSS);
         </script>
         <div style="height: 50px;"></div>
-        <div id="entries-container"></div>
+        <div id="entries-container" style="min-height: 100vh;"></div>
         """
     }
 }
