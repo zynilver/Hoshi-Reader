@@ -317,14 +317,16 @@ function applyTableStyles(html) {
     .replace(/<td(?=[>\s])/g, `<td style="${cellStyle}"`);
 }
 
-const COMPACT_GLOSSARIES_ANKI = `.yomitan-glossary ul[data-sc-content="glossary"] > li:not(:first-child)::before { white-space: pre-wrap; content: " | "; display: inline; color: rgb(119, 119, 119); }
-.yomitan-glossary ul[data-sc-content="glossary"] > li { display: inline; }
-.yomitan-glossary ul[data-sc-content="glossary"] { display: inline; list-style: none; padding-left: 0px; }`;
+const COMPACT_GLOSSARIES_ANKI = `.yomitan-glossary ul[data-sc-content="glossary"] > li:not(:first-child)::before, .yomitan-glossary .glossary-list > li:not(:first-child)::before { white-space: pre-wrap; content: " | "; display: inline; color: rgb(119, 119, 119); }
+.yomitan-glossary ul[data-sc-content="glossary"] > li, .yomitan-glossary .glossary-list > li { display: inline; }
+.yomitan-glossary ul[data-sc-content="glossary"], .yomitan-glossary .glossary-list { display: inline; list-style: none; padding-left: 0px; }`;
 
 // the following two should roughly match the glossary format of yomitan and keep compatibility with notetypes like lapis
 // 23.01.2026: this still has some differences
 // 24.01.2026: should be a bit closer now
 // 25.01.2026: fixed jmdict
+// 19.02.2026: fixed jmdict legacy
+// 24.03.2026: fixed compact glossaries for jmdict legacy
 function constructSingleGlossaryHtml(entryIndex) {
     if (!window.lookupEntries || entryIndex >= window.lookupEntries.length) {
         return {};
