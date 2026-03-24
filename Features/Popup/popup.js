@@ -1288,7 +1288,7 @@ function createGlossarySection(dictName, contents, isFirst) {
     return details;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+window.renderPopup = function() {
     const container = document.getElementById('entries-container');
     if (!window.lookupEntries) {
         return;
@@ -1357,4 +1357,4 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
     });
-});
+};

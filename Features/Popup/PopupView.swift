@@ -118,6 +118,9 @@ struct PopupView: View {
     var onTapOutside: (() -> Void)?
     var onSwipeDismiss: (() -> Void)?
     
+    @State private var content: String = ""
+    @State private var lookupEntries: [[String: Any]] = []
+    
     private var layout: PopupLayout? {
         guard let selectionData else {
             return nil
@@ -147,11 +150,13 @@ struct PopupView: View {
     var body: some View {
         if #available(iOS 26, *) {
             GlassEffectContainer {
-                if isVisible, let selectionData, let layout {
+                if isVisible, let selectionData, let layout, !content.isEmpty {
                     PopupWebView(
-                        content: constructHtml(selectionData: selectionData),
+                        content: content,
                         position: CGPoint(x: layout.position.x - layout.width / 2, y: layout.position.y - layout.height / 2),
                         clearHighlight: clearHighlight,
+                        dictionaryStyles: dictionaryStyles,
+                        lookupEntries: lookupEntries,
                         onMine: { content in
                             AnkiManager.shared.addNote(content: content, context: MiningContext(sentence: selectionData.sentence, documentTitle: documentTitle, coverURL: coverURL))
                         },
@@ -164,58 +169,74 @@ struct PopupView: View {
                     .position(layout.position)
                 }
             }
+            .onAppear { buildHtml() }
         } else {
-            if isVisible, let selectionData, let layout {
-                PopupWebView(
-                    content: constructHtml(selectionData: selectionData),
-                    position: CGPoint(x: layout.position.x - layout.width / 2, y: layout.position.y - layout.height / 2),
-                    clearHighlight: clearHighlight,
-                    onMine: { content in
-                        AnkiManager.shared.addNote(content: content, context: MiningContext(sentence: selectionData.sentence, documentTitle: documentTitle, coverURL: coverURL))
-                    },
-                    onTextSelected: onTextSelected,
-                    onTapOutside: onTapOutside,
-                    onSwipeDismiss: onSwipeDismiss
-                )
-                .frame(width: max(1, layout.width), height: max(1, layout.height))
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.primary.opacity(0.2), lineWidth: 1))
-                .position(layout.position)
+            Group {
+                if isVisible, let selectionData, let layout, !content.isEmpty {
+                    PopupWebView(
+                        content: content,
+                        position: CGPoint(x: layout.position.x - layout.width / 2, y: layout.position.y - layout.height / 2),
+                        clearHighlight: clearHighlight,
+                        dictionaryStyles: dictionaryStyles,
+                        lookupEntries: lookupEntries,
+                        onMine: { content in
+                            AnkiManager.shared.addNote(content: content, context: MiningContext(sentence: selectionData.sentence, documentTitle: documentTitle, coverURL: coverURL))
+                        },
+                        onTextSelected: onTextSelected,
+                        onTapOutside: onTapOutside,
+                        onSwipeDismiss: onSwipeDismiss
+                    )
+                    .frame(width: max(1, layout.width), height: max(1, layout.height))
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.primary.opacity(0.2), lineWidth: 1))
+                    .position(layout.position)
+                }
             }
+            .onAppear { buildHtml() }
         }
     }
     
-    private func constructHtml(selectionData: SelectionData) -> String {
-        var entries: [EntryData] = []
+    private func buildHtml() {
+        guard content.isEmpty else { return }
         
+        var entries: [[String: Any]] = []
         for result in lookupResults {
             let expression = String(result.term.expression)
             let reading = String(result.term.reading)
             let matched = String(result.matched)
-            let deinflectionTrace = result.trace.reversed().map { DeinflectionTag(name: String($0.name), description: String($0.description)) }
+            let deinflectionTrace = result.trace.reversed().map {
+                [
+                    "name": String($0.name),
+                    "description": String($0.description),
+                ]
+            }
             
-            var glossaries: [GlossaryData] = []
+            var glossaries: [[String: Any]] = []
             for glossary in result.term.glossaries {
-                glossaries.append(GlossaryData(
-                    dictionary: String(glossary.dict_name),
-                    content: String(glossary.glossary),
-                    definitionTags: String(glossary.definition_tags),
-                    termTags: String(glossary.term_tags)
-                ))
+                glossaries.append([
+                    "dictionary": String(glossary.dict_name),
+                    "content": String(glossary.glossary),
+                    "definitionTags": String(glossary.definition_tags),
+                    "termTags": String(glossary.term_tags),
+                ])
             }
             
-            var frequencies: [FrequencyData] = []
+            var frequencies: [[String: Any]] = []
             for frequency in result.term.frequencies {
-                var frequencyTags: [FrequencyTag] = []
+                var frequencyTags: [[String: Any]] = []
                 for frequencyTag in frequency.frequencies {
-                    frequencyTags.append(FrequencyTag(value: Int(frequencyTag.value), displayValue: String(frequencyTag.display_value)))
+                    frequencyTags.append([
+                        "value": Int(frequencyTag.value),
+                        "displayValue": String(frequencyTag.display_value),
+                    ])
                 }
-                frequencies.append(FrequencyData(
-                    dictionary: String(frequency.dict_name),
-                    frequencies: frequencyTags))
+                frequencies.append([
+                    "dictionary": String(frequency.dict_name),
+                    "frequencies": frequencyTags,
+                ])
             }
             
-            var pitches: [PitchData] = []
+            var pitches: [[String: Any]] = []
             for pitchEntry in result.term.pitches {
                 var pitchPositions: [Int] = []
                 for element in pitchEntry.pitch_positions {
@@ -224,35 +245,35 @@ struct PopupView: View {
                         pitchPositions.append(position)
                     }
                 }
-                pitches.append(PitchData(dictionary: String(pitchEntry.dict_name), pitchPositions: pitchPositions))
+                pitches.append([
+                    "dictionary": String(pitchEntry.dict_name),
+                    "pitchPositions": pitchPositions,
+                ])
             }
             
             let rules = String(result.term.rules).split(separator: " ").map { String($0) }
             
-            entries.append(EntryData(
-                expression: expression,
-                reading: reading,
-                matched: matched,
-                deinflectionTrace: deinflectionTrace,
-                glossaries: glossaries,
-                frequencies: frequencies,
-                pitches: pitches,
-                rules: rules
-            ))
+            entries.append([
+                "expression": expression,
+                "reading": reading,
+                "matched": matched,
+                "deinflectionTrace": deinflectionTrace,
+                "glossaries": glossaries,
+                "frequencies": frequencies,
+                "pitches": pitches,
+                "rules": rules,
+            ])
         }
         
-        let styles = (try? JSONEncoder().encode(dictionaryStyles)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
-        let entriesJson = (try? JSONEncoder().encode(entries)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+        lookupEntries = entries
         
         let audioSources = (try? JSONEncoder().encode(userConfig.enabledAudioSources))
             .flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
         let customCSS = (try? JSONSerialization.data(withJSONObject: userConfig.customCSS, options: .fragmentsAllowed))
             .flatMap { String(data: $0, encoding: .utf8) } ?? "\"\""
         
-        return """
+        content = """
         <script>
-            window.dictionaryStyles = \(styles);
-            window.lookupEntries = \(entriesJson);
             window.collapseDictionaries = \(userConfig.collapseDictionaries);
             window.compactGlossaries = \(userConfig.compactGlossaries);
             window.audioSources = \(audioSources);

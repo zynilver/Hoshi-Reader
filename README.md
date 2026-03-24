@@ -17,6 +17,9 @@ A lightweight Japanese EPUB reader designed for iOS 26 with Yomitan dictionary s
 </p>
 
 ## Download
+[![App Store](https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg)](https://apps.apple.com/app/hoshi-reader/id6758244332)
+
+If you'd like to try out features early consider joining the TestFlight Beta
 
 [![TestFlight](https://img.shields.io/badge/TestFlight-Join%20Beta-blue?logo=testflight&style=for-the-badge)](https://testflight.apple.com/join/G6KHqNAC)
 ## Features

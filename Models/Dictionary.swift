@@ -45,44 +45,6 @@ nonisolated struct DictionaryIndex: Codable {
     let downloadUrl: String
 }
 
-struct GlossaryData: Encodable {
-    let dictionary: String
-    let content: String
-    let definitionTags: String
-    let termTags: String
-}
-
-struct FrequencyData: Encodable {
-    let dictionary: String
-    let frequencies: [FrequencyTag]
-}
-
-struct PitchData: Encodable {
-    let dictionary: String
-    let pitchPositions: [Int]
-}
-
-struct EntryData: Encodable {
-    let expression: String
-    let reading: String
-    let matched: String
-    let deinflectionTrace: [DeinflectionTag]
-    let glossaries: [GlossaryData]
-    let frequencies: [FrequencyData]
-    let pitches: [PitchData]
-    let rules: [String]
-}
-
-struct DeinflectionTag: Encodable {
-    let name: String
-    let description: String
-}
-
-struct FrequencyTag: Encodable {
-    let value: Int
-    let displayValue: String
-}
-
 struct AudioSource: Codable, Identifiable {
     var id: String { url }
     var name: String

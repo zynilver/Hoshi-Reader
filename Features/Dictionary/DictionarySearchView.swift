@@ -14,6 +14,8 @@ struct DictionarySearchView: View {
     @State private var query: String = ""
     @State private var lastQuery: String = ""
     @State private var content: String = ""
+    @State private var dictionaryStyles: [String: String] = [:]
+    @State private var lookupEntries: [[String: Any]] = []
     @State private var hasSearched = false
     @State private var searchFocused = false
     @State private var didInitialQuery = false
@@ -29,6 +31,8 @@ struct DictionarySearchView: View {
                     content: content,
                     position: .zero,
                     clearHighlight: clearHighlight,
+                    dictionaryStyles: dictionaryStyles,
+                    lookupEntries: lookupEntries,
                     onMine: { minedContent in
                         AnkiManager.shared.addNote(content: minedContent, context: MiningContext(sentence: lastQuery, documentTitle: nil, coverURL: nil))
                     },
@@ -87,8 +91,8 @@ struct DictionarySearchView: View {
         .ignoresSafeArea()
         .overlay(alignment: .top) {
             LinearGradient(colors: [Color(.systemBackground), .clear], startPoint: .top, endPoint: .bottom)
-            .frame(height: UIApplication.topSafeArea + 50)
-            .ignoresSafeArea(edges: .top)
+                .frame(height: UIApplication.topSafeArea + 50)
+                .ignoresSafeArea(edges: .top)
         }
         .safeAreaInset(edge: .top) {
             DictionarySearchBar(text: $query, isFocused: $searchFocused) {
@@ -121,17 +125,21 @@ struct DictionarySearchView: View {
         
         guard !trimmed.isEmpty else {
             content = ""
+            lookupEntries = []
+            dictionaryStyles = [:]
             return
         }
         
         let results = LookupEngine.shared.lookup(trimmed, maxResults: userConfig.maxResults, scanLength: userConfig.scanLength)
         if results.isEmpty {
             content = ""
+            lookupEntries = []
+            dictionaryStyles = [:]
             return
         }
         
         let styles = LookupEngine.shared.getStyles()
-        content = constructHtml(results: results, styles: styles)
+        constructHtml(results: results, styles: styles)
     }
     
     private func handleTextSelection(_ selection: SelectionData, maxResults: Int, scanLength: Int,  isVertical: Bool, isFullWidth: Bool) -> Int? {
@@ -189,37 +197,50 @@ struct DictionarySearchView: View {
         }
     }
     
-    private func constructHtml(results: [LookupResult], styles: [DictionaryStyle]) -> String {
-        var entries: [EntryData] = []
+    private func constructHtml(results: [LookupResult], styles: [DictionaryStyle]) {
+        dictionaryStyles = [:]
+        for style in styles {
+            dictionaryStyles[String(style.dict_name)] = String(style.styles)
+        }
         
+        var entries: [[String: Any]] = []
         for result in results {
             let expression = String(result.term.expression)
             let reading = String(result.term.reading)
             let matched = String(result.matched)
-            let deinflectionTrace = result.trace.reversed().map { DeinflectionTag(name: String($0.name), description: String($0.description)) }
+            let deinflectionTrace = result.trace.reversed().map {
+                [
+                    "name": String($0.name),
+                    "description": String($0.description),
+                ]
+            }
             
-            var glossaries: [GlossaryData] = []
+            var glossaries: [[String: Any]] = []
             for glossary in result.term.glossaries {
-                glossaries.append(GlossaryData(
-                    dictionary: String(glossary.dict_name),
-                    content: String(glossary.glossary),
-                    definitionTags: String(glossary.definition_tags),
-                    termTags: String(glossary.term_tags)
-                ))
+                glossaries.append([
+                    "dictionary": String(glossary.dict_name),
+                    "content": String(glossary.glossary),
+                    "definitionTags": String(glossary.definition_tags),
+                    "termTags": String(glossary.term_tags),
+                ])
             }
             
-            var frequencies: [FrequencyData] = []
+            var frequencies: [[String: Any]] = []
             for frequency in result.term.frequencies {
-                var frequencyTags: [FrequencyTag] = []
+                var frequencyTags: [[String: Any]] = []
                 for frequencyTag in frequency.frequencies {
-                    frequencyTags.append(FrequencyTag(value: Int(frequencyTag.value), displayValue: String(frequencyTag.display_value)))
+                    frequencyTags.append([
+                        "value": Int(frequencyTag.value),
+                        "displayValue": String(frequencyTag.display_value),
+                    ])
                 }
-                frequencies.append(FrequencyData(
-                    dictionary: String(frequency.dict_name),
-                    frequencies: frequencyTags))
+                frequencies.append([
+                    "dictionary": String(frequency.dict_name),
+                    "frequencies": frequencyTags,
+                ])
             }
             
-            var pitches: [PitchData] = []
+            var pitches: [[String: Any]] = []
             for pitchEntry in result.term.pitches {
                 var pitchPositions: [Int] = []
                 for element in pitchEntry.pitch_positions {
@@ -228,40 +249,36 @@ struct DictionarySearchView: View {
                         pitchPositions.append(position)
                     }
                 }
-                pitches.append(PitchData(dictionary: String(pitchEntry.dict_name), pitchPositions: pitchPositions))
+                pitches.append([
+                    "dictionary": String(pitchEntry.dict_name),
+                    "pitchPositions": pitchPositions,
+                ])
             }
             
             let rules = String(result.term.rules).split(separator: " ").map { String($0) }
             
-            entries.append(EntryData(
-                expression: expression,
-                reading: reading,
-                matched: matched,
-                deinflectionTrace: deinflectionTrace,
-                glossaries: glossaries,
-                frequencies: frequencies,
-                pitches: pitches,
-                rules: rules
-            ))
+            entries.append([
+                "expression": expression,
+                "reading": reading,
+                "matched": matched,
+                "deinflectionTrace": deinflectionTrace,
+                "glossaries": glossaries,
+                "frequencies": frequencies,
+                "pitches": pitches,
+                "rules": rules,
+            ])
         }
         
-        var dictionaryStyles: [String: String] = [:]
-        for style in styles {
-            dictionaryStyles[String(style.dict_name)] = String(style.styles)
-        }
+        lookupEntries = entries
         
-        let stylesJson = (try? JSONEncoder().encode(dictionaryStyles)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
-        let entriesJson = (try? JSONEncoder().encode(entries)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
         let audioSources = (try? JSONEncoder().encode(userConfig.enabledAudioSources))
             .flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
         let customCSS = (try? JSONSerialization.data(withJSONObject: userConfig.customCSS, options: .fragmentsAllowed))
             .flatMap { String(data: $0, encoding: .utf8) } ?? "\"\""
         
-        return """
+        content = """
         <style>.overlay { padding-bottom: 90px; }</style>
         <script>
-            window.dictionaryStyles = \(stylesJson);
-            window.lookupEntries = \(entriesJson);
             window.collapseDictionaries = \(userConfig.collapseDictionaries);
             window.compactGlossaries = \(userConfig.compactGlossaries);
             window.audioSources = \(audioSources);

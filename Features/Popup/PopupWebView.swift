@@ -106,6 +106,8 @@ struct PopupWebView: UIViewRepresentable {
     let content: String
     let position: CGPoint
     var clearHighlight: Bool
+    var dictionaryStyles: [String: String] = [:]
+    var lookupEntries: [[String: Any]] = []
     var onMine: (([String: String]) -> Void)? = nil
     var onTextSelected: ((SelectionData) -> Int?)? = nil
     var onTapOutside: (() -> Void)? = nil
@@ -178,6 +180,7 @@ struct PopupWebView: UIViewRepresentable {
         webView.scrollView.isScrollEnabled = true
         webView.scrollView.bounces = false
         webView.scrollView.showsHorizontalScrollIndicator = false
+        webView.navigationDelegate = context.coordinator
         return webView
     }
     
@@ -209,7 +212,7 @@ struct PopupWebView: UIViewRepresentable {
         webView.configuration.userContentController.removeScriptMessageHandler(forName: "duplicateCheck", contentWorld: .page)
     }
     
-    class Coordinator: NSObject, WKScriptMessageHandler, WKScriptMessageHandlerWithReply {
+    class Coordinator: NSObject, WKScriptMessageHandler, WKScriptMessageHandlerWithReply, WKNavigationDelegate {
         var parent: PopupWebView
         var currentContent: String = ""
         var wasLoaded: Bool = false
@@ -218,6 +221,23 @@ struct PopupWebView: UIViewRepresentable {
         
         init(parent: PopupWebView) {
             self.parent = parent
+        }
+        
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            webView.callAsyncJavaScript(
+                """
+                window.dictionaryStyles = dictionaryStyles;
+                window.lookupEntries = lookupEntries;
+                window.renderPopup();
+                """,
+                arguments: [
+                    "dictionaryStyles": parent.dictionaryStyles,
+                    "lookupEntries": parent.lookupEntries,
+                ],
+                in: nil,
+                in: .page,
+                completionHandler: nil
+            )
         }
         
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) async -> (Any?, String?) {
