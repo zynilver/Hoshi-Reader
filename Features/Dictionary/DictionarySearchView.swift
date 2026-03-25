@@ -47,6 +47,7 @@ struct DictionarySearchView: View {
                 ForEach($popups) { $popup in
                     let popupId = popup.id
                     PopupView(
+                        userConfig: userConfig,
                         isVisible: $popup.showPopup,
                         selectionData: popup.currentSelection,
                         lookupResults: popup.lookupResults,
@@ -160,7 +161,7 @@ struct DictionarySearchView: View {
         popups.append(popup)
         
         if let firstResult = lookupResults.first {
-            withAnimation(.default.speed(2)) {
+            withAnimation(.default.speed(2.2)) {
                 popups = popups.map {
                     var p = $0
                     if p.id == popup.id {
@@ -176,7 +177,7 @@ struct DictionarySearchView: View {
     
     private func closePopups() {
         let popupIds = Set(popups.map(\.id))
-        withAnimation(.default.speed(2)) {
+        withAnimation(.default.speed(2.4)) {
             for index in popups.indices {
                 popups[index].showPopup = false
             }
@@ -187,7 +188,7 @@ struct DictionarySearchView: View {
     
     private func closeChildPopups(parent: Int) {
         var popupIds: Set<UUID> = []
-        withAnimation(.default.speed(2)) {
+        withAnimation(.default.speed(2.4)) {
             for index in popups.indices.dropFirst(parent + 1) {
                 popups[index].showPopup = false
                 popupIds.insert(popups[index].id)

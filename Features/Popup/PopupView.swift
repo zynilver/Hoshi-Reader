@@ -43,7 +43,7 @@ struct PopupLayout {
     }
     
     private var showBelow: Bool {
-        spaceBelow >= spaceAbove
+        spaceBelow >= height
     }
     
     var width: CGFloat {
@@ -93,7 +93,7 @@ struct PopupLayout {
                 } else {
                     y = selectionRect.minY - popupPadding - (height / 2)
                 }
-                y = max(height / 2 + topInset, min(y, screenSize.height - bottomInset - height / 2))
+                y = max(height / 2 + topInset + screenBorderPadding, min(y, screenSize.height - bottomInset - height / 2 - screenBorderPadding))
             }
         }
         return CGPoint(x: x, y: y)
@@ -120,6 +120,45 @@ struct PopupView: View {
     
     @State private var content: String = ""
     @State private var lookupEntries: [[String: Any]] = []
+    
+    init(
+        userConfig: UserConfig,
+        isVisible: Binding<Bool>,
+        selectionData: SelectionData?,
+        lookupResults: [LookupResult],
+        dictionaryStyles: [String: String],
+        screenSize: CGSize,
+        isVertical: Bool,
+        isFullWidth: Bool,
+        topInset: CGFloat = 0,
+        bottomInset: CGFloat = 0,
+        coverURL: URL?,
+        documentTitle: String?,
+        clearHighlight: Bool,
+        onTextSelected: ((SelectionData) -> Int?)? = nil,
+        onTapOutside: (() -> Void)? = nil,
+        onSwipeDismiss: (() -> Void)? = nil
+    ) {
+        _isVisible = isVisible
+        self.selectionData = selectionData
+        self.lookupResults = lookupResults
+        self.dictionaryStyles = dictionaryStyles
+        self.screenSize = screenSize
+        self.isVertical = isVertical
+        self.isFullWidth = isFullWidth
+        self.topInset = topInset
+        self.bottomInset = bottomInset
+        self.coverURL = coverURL
+        self.documentTitle = documentTitle
+        self.clearHighlight = clearHighlight
+        self.onTextSelected = onTextSelected
+        self.onTapOutside = onTapOutside
+        self.onSwipeDismiss = onSwipeDismiss
+        
+        let cache = Self.buildContent(lookupResults: lookupResults, userConfig: userConfig)
+        _content = State(initialValue: cache.content)
+        _lookupEntries = State(initialValue: cache.lookupEntries)
+    }
     
     private var layout: PopupLayout? {
         guard let selectionData else {
@@ -169,7 +208,6 @@ struct PopupView: View {
                     .position(layout.position)
                 }
             }
-            .onAppear { buildHtml() }
         } else {
             Group {
                 if isVisible, let selectionData, let layout, !content.isEmpty {
@@ -192,13 +230,10 @@ struct PopupView: View {
                     .position(layout.position)
                 }
             }
-            .onAppear { buildHtml() }
         }
     }
     
-    private func buildHtml() {
-        guard content.isEmpty else { return }
-        
+    private static func buildContent(lookupResults: [LookupResult], userConfig: UserConfig) -> (content: String, lookupEntries: [[String: Any]]) {
         var entries: [[String: Any]] = []
         for result in lookupResults {
             let expression = String(result.term.expression)
@@ -265,14 +300,12 @@ struct PopupView: View {
             ])
         }
         
-        lookupEntries = entries
-        
         let audioSources = (try? JSONEncoder().encode(userConfig.enabledAudioSources))
             .flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
         let customCSS = (try? JSONSerialization.data(withJSONObject: userConfig.customCSS, options: .fragmentsAllowed))
             .flatMap { String(data: $0, encoding: .utf8) } ?? "\"\""
         
-        content = """
+        let content = """
         <script>
             window.collapseDictionaries = \(userConfig.collapseDictionaries);
             window.compactGlossaries = \(userConfig.compactGlossaries);
@@ -287,5 +320,7 @@ struct PopupView: View {
         </script>
         <div id="entries-container"></div>
         """
+        
+        return (content, entries)
     }
 }

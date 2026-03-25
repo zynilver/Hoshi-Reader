@@ -249,13 +249,13 @@ window.hoshiSelection = {
         webkit.messageHandlers.textSelected.postMessage({
             text,
             sentence,
-            rect: this.getSelectionRect()
+            rect: this.getSelectionRect(x, y)
         });
         
         return text;
     },
     
-    getSelectionRect() {
+    getSelectionRect(x, y) {
         if (!this.selection?.ranges.length) {
             return null;
         }
@@ -265,7 +265,8 @@ window.hoshiSelection = {
         range.setStart(first.node, first.start);
         range.setEnd(first.node, first.start + 1);
         
-        const rect = range.getBoundingClientRect();
+        const rects = Array.from(range.getClientRects());
+        const rect = rects.find(rect => x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) ?? range.getBoundingClientRect();
         return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
     },
     
