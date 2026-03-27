@@ -41,7 +41,9 @@ final class ShareViewController: UIViewController {
                     }
                     responder = responder?.next
                 }
-                self.finish()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    self.finish()
+                }
             }
         }
     }
