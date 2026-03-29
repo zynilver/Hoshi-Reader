@@ -7,9 +7,6 @@
 //
 
 window.hoshiReader = {
-    selection: null,
-    scanDelimiters: '。、！？…‥「」『』（）()【】〈〉《》〔〕｛｝{}［］[]・：；:;，,.─\n\r',
-    sentenceDelimiters: '。！？.!?\n\r',
     ttuRegex: /[^0-9A-Z○◯々-〇〻ぁ-ゖゝ-ゞァ-ヺー０-９Ａ-Ｚｦ-ﾝ\p{Radical}\p{Unified_Ideograph}]+/gimu,
     
     isVertical() {
@@ -19,11 +16,6 @@ window.hoshiReader = {
     isFurigana(node) {
         const el = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
         return !!el?.closest('rt, rp');
-    },
-    
-    findParagraph(node) {
-        let el = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
-        return el?.closest('p') || null;
     },
     
     countChars(text) {
