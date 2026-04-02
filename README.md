@@ -6,7 +6,7 @@
 ![Platform](https://img.shields.io/badge/platform-iOS-lightgrey)
 ![License](https://img.shields.io/github/license/Manhhao/Hoshi-Reader)
 
-A lightweight Japanese EPUB reader designed for iOS 26 with Yomitan dictionary support
+Hoshi Reader is a lightweight Japanese EPUB reader with Yomitan dictionary support, made for immersion learning.
 <p align="center">
     <img src="Pictures/books.PNG" width="25%" alt="books">
     <img src="Pictures/reader.PNG" width="25%" alt="reader">
