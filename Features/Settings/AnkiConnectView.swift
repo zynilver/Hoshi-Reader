@@ -20,7 +20,7 @@ struct AnkiConnectView: View {
                 Toggle("Use AnkiConnect", isOn: $ankiManager.useAnkiConnect)
                     .onChange(of: ankiManager.useAnkiConnect) { _, _ in ankiManager.save() }
             } footer: {
-                Text("Will disable AnkiMobile integration.")
+                Text("This will replace AnkiMobile callbacks with AnkiConnect requests.")
             }
             Section {
                 if ankiManager.useAnkiConnect {
